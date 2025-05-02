@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { FiDollarSign, FiShield, FiSmartphone } from "react-icons/fi";
 import CollectionCard from "./Components/CollectionCard";
 import NewArrivals from "./Components/NewArrivals";
@@ -7,18 +7,19 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 const HomePage = () => {
+    const collectionRef = useRef(null);
     useEffect(() => {
         AOS.init({
             duration: 1000,
             once: true,
         });
     }, []);
-// updated
+    // updated
     return (
         <>
             {/* VideoBox component without scroll animation */}
             <div>
-                <VideoBox />
+                <VideoBox scrollToRef={collectionRef} />
             </div>
 
             {/* NewArrivals component with scroll animation */}
@@ -29,17 +30,17 @@ const HomePage = () => {
             {/* Why Choose RenTour Section */}
             <div className="py-16 px-4 sm:px-6 lg:px-8 bg-white font-sans">
                 <div className="max-w-7xl mx-auto">
-                    <h2 
+                    <h2
                         className="text-xl sm:text-3xl font-semibold mb-12 tracking-wider text-center text-gray-800"
                         data-aos="fade-down"
                         data-aos-delay="50"
                     >
                         WHY CHOOSE <span className="text-gray-900">RENTOUR</span>
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Cost Effective */}
-                        <div 
+                        <div
                             className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:bg-white transition-all duration-300 transform hover:scale-[1.02] group"
                             data-aos="fade-up"
                             data-aos-delay="150"
@@ -52,9 +53,9 @@ const HomePage = () => {
                                 Save up to 70% compared to buying new. Pay only for the time you need.
                             </p>
                         </div>
-                        
+
                         {/* Reliable Quality */}
-                        <div 
+                        <div
                             className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:bg-white transition-all duration-300 transform hover:scale-[1.02] group"
                             data-aos="fade-up"
                             data-aos-delay="250"
@@ -67,9 +68,9 @@ const HomePage = () => {
                                 All devices are professionally inspected and come with warranties.
                             </p>
                         </div>
-                        
+
                         {/* Latest Models */}
-                        <div 
+                        <div
                             className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:bg-white transition-all duration-300 transform hover:scale-[1.02] group"
                             data-aos="fade-up"
                             data-aos-delay="350"
@@ -100,7 +101,7 @@ const HomePage = () => {
                     <h2 className="text-xl sm:text-3xl font-semibold mb-12 tracking-wider text-center text-gray-800">
                         WHAT PEOPLE SAY ABOUT US
                     </h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Testimonial 1 */}
                         <div className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:shadow-md transition-all">
@@ -109,7 +110,7 @@ const HomePage = () => {
                             </p>
                             <p className="text-gray-800 font-medium">— Sarah K.</p>
                         </div>
-                        
+
                         {/* Testimonial 2 */}
                         <div className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:shadow-md transition-all">
                             <p className="text-gray-600 italic mb-4">
@@ -117,13 +118,13 @@ const HomePage = () => {
                             </p>
                             <p className="text-gray-800 font-medium">— Michael T.</p>
                         </div>
-                        
+
                         {/* Testimonial 3 */}
                         <div className="bg-gray-50 p-8 rounded-lg border border-gray-200 hover:shadow-md transition-all">
                             <p className="text-gray-600 italic mb-4">
                                 "The camera equipment I rented was in perfect condition and helped me complete my client project on budget."
                             </p>
-                            <p className="text-gray-800 font-medium">— David R.</p>    
+                            <p className="text-gray-800 font-medium">— David R.</p>
                         </div>
                     </div>
                 </div>

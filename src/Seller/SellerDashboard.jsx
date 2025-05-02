@@ -17,7 +17,7 @@ const SellerDashboard = () => {
 
         <div className="bg-gray-100 min-h-screen" >
             {/* Navbar */}
-            <nav nav className="bg-blue-600 text-white p-4" >
+            <nav className="bg-blue-600 text-white p-4" >
                 <div className="flex justify-between items-center">
                     <Link to={"/seller"}>
                         <h2 className="text-2xl font-bold">Seller Dashboard</h2>
@@ -35,7 +35,7 @@ const SellerDashboard = () => {
             </nav >
 
             {/* Dashboard Content */}
-            <div div className="container mx-auto p-6" >
+            <div className="container mx-auto p-6" >
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-semibold">Your Posted Products</h3>
                     {/* Button to Add a New Product */}

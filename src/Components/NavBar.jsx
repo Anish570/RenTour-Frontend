@@ -109,7 +109,7 @@ const NavBar = ({ toggleCart }) => {
             <div className='w-full h-[30%]'>
                 <ProductCategory />
             </div>
-        </div >
+        </div>
     );
 };
 
