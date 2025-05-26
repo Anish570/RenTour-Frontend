@@ -24,6 +24,8 @@ const Cameras = lazy(() => import("./Pages/Categories/Cameras"));
 const Tablets = lazy(() => import("./Pages/Categories/Tablets"));
 const Drones = lazy(() => import("./Pages/Categories/Drones"));
 const Headphones = lazy(() => import("./Pages/Categories/Headphones"));
+const Others = lazy(() => import("./Pages/Categories/Others"));
+const CollectionCategoryPage = lazy(() => import("./Pages/Categories/CollectionCategoryPage"));
 
 // Particular ProductDetail
 const ProductDetail = lazy(() => import("./Pages/Product/ProductDetail"));
@@ -86,14 +88,16 @@ const Router = createBrowserRouter([
         element: LazyLoad(Collections),
         errorElement: <ErrorBoundary />, // Error handling for collections
         children: [
-          { index: true, element: LazyLoad(BestSeller) },
-          { path: "new-arrivals", element: LazyLoad(NewArrivals) },
-          { path: "mobiles", element: LazyLoad(Mobiles) },
-          { path: "laptops", element: LazyLoad(Laptops) },
-          { path: "cameras", element: LazyLoad(Cameras) },
-          { path: "headphones", element: LazyLoad(Headphones) },
-          { path: "ipads", element: LazyLoad(Tablets) },
-          { path: "drones", element: LazyLoad(Drones) },
+          // { index: true, element: LazyLoad(BestSeller) },
+          // { path: "new-arrivals", element: LazyLoad(NewArrivals) },
+          // { path: "mobiles", element: LazyLoad(Mobiles) },
+          // { path: "laptops", element: LazyLoad(Laptops) },
+          // { path: "cameras", element: LazyLoad(Cameras) },
+          // { path: "headphones", element: LazyLoad(Headphones) },
+          // { path: "ipads", element: LazyLoad(Tablets) },
+          // { path: "drones", element: LazyLoad(Drones) },
+          { path: "others", element: LazyLoad(Others) },
+          { path: ":category", element: LazyLoad(CollectionCategoryPage) },
         ],
       },
 

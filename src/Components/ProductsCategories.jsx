@@ -33,6 +33,10 @@ const ProductCategory = () => {
             // icon: "/featureproducts/drone.svg",
             path: "/collections/drones"
         },
+        {
+            name: "Others",
+            path: "/collections/others"
+        }
     ];
     return (
         <div className="h-fit sm:h-full flex shrink-0 flex-wrap items-center justify-center w-full gap-x-4 sm:gap-x-7">
