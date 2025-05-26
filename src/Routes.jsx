@@ -89,7 +89,7 @@ const Router = createBrowserRouter([
         errorElement: <ErrorBoundary />, // Error handling for collections
         children: [
           // { index: true, element: LazyLoad(BestSeller) },
-          // { path: "new-arrivals", element: LazyLoad(NewArrivals) },
+          { path: "new-arrivals", element: LazyLoad(NewArrivals) },
           // { path: "mobiles", element: LazyLoad(Mobiles) },
           // { path: "laptops", element: LazyLoad(Laptops) },
           // { path: "cameras", element: LazyLoad(Cameras) },
