@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useCart } from "../../GlobalState/CartContext";
 import { IoIosStar } from "react-icons/io";
 import axios from "axios";
@@ -9,7 +9,7 @@ const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainImage, setMainImage] = useState(null); // state to control main image
-    const { addToCart } = useCart();
+    const { addToCart, cartLoading } = useCart();
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
     // Fetch product details
@@ -102,13 +102,32 @@ const ProductDetail = () => {
 
                     </div>
                     {/* Add to Cart Button */}
-                    <div className="self-end">
+                    {/* <div className="self-end">
                         <button
                             onClick={() => { addToCart(product.id, product.offeredPrice) }}
                             className="text-[13px] sm:text-[14px] cursor-pointer px-6 py-1 border border-black bg-black text-white hover:bg-white hover:text-black transition-all duration-300"
                         >
                             Add to Cart
                         </button>
+                    </div> */}
+                    <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <button
+                            disabled={cartLoading}
+                            onClick={() => addToCart(product.id, product.offeredPrice)}
+                            className="min-w-[140px] px-6 py-2 bg-black text-white hover:bg-white hover:text-black border border-black transition-all duration-300"
+                        >
+                            {cartLoading ? "Adding..." : "Add to Cart"}
+                        </button>
+                        {/* <Link
+                            to={"/buynow"}
+                            className="min-w-[140px] px-6 py-2 bg-green-600 text-white hover:bg-white hover:text-green-600 border border-green-600 transition-all duration-300"
+                            onClick={() => {
+                                addToCart(product.item_id);
+
+                            }}
+                        >
+                            Buy Now
+                        </Link> */}
                     </div>
                 </div>
                 {/* Reviews Section */}

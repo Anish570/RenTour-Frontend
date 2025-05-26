@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useCart } from "../GlobalState/CartContext";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const CartCard = ({ productid, quantity, }) => {
     const { isCartOpen, updateQuantity, removeFromCart } = useCart();
     const [product, setProduct] = useState(null);
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    const [isRemoving, setIsRemoving] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
+    const [isSubtracting, setIsSubtracting] = useState(false);
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -23,11 +27,34 @@ const CartCard = ({ productid, quantity, }) => {
 
     const isLoggedIn = !!localStorage.getItem("authToken");
 
-    const handleSubtract = () => {
+    // const handleSubtract = () => {
+    //     if (quantity > 1) {
+    //         updateQuantity(productid, quantity - 1);
+    //     }
+    // };
+    const handleSubtract = async () => {
         if (quantity > 1) {
-            updateQuantity(productid, quantity - 1);
+            setIsSubtracting(true);
+            await updateQuantity(product?.id, quantity - 1);
+            setIsSubtracting(false);
         }
     };
+
+
+    const handleAdd = async () => {
+        setIsAdding(true);
+        await updateQuantity(product?.id, quantity + 1);
+        setIsAdding(false);
+    };
+
+    const handleRemove = async () => {
+        setIsRemoving(true);
+        await removeFromCart(product.id);
+        setIsRemoving(false);
+    };
+
+    if (!product) return null;
+
 
     if (!product) return null;
 
@@ -47,29 +74,41 @@ const CartCard = ({ productid, quantity, }) => {
                 {/* Quantity Controls */}
                 <div className="flex items-center gap-2 mt-1">
                     <button
-                        onClick={handleSubtract}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                        disabled={quantity <= 1 || !isLoggedIn}
+                        onClick={() => { handleSubtract() }}
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                        disabled={product.quantity <= 1 || !isLoggedIn || isSubtracting}
                     >
-                        -
+                        {isSubtracting ? (
+                            <AiOutlineLoading3Quarters className="animate-spin text-base" />
+                        ) : (
+                            "-"
+                        )}
                     </button>
                     <span>{quantity}</span>
                     <button
-                        onClick={() => updateQuantity(productid, quantity + 1)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                        disabled={!isLoggedIn}
+                        onClick={() => { handleAdd() }}
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center"
+                        disabled={product.quantity <= 1 || !isLoggedIn || isAdding}
                     >
-                        +
+                        {isAdding ? (
+                            <AiOutlineLoading3Quarters className="animate-spin text-base" />
+                        ) : (
+                            "+"
+                        )}
                     </button>
                 </div>
             </div>
 
             <button
-                className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50"
-                onClick={() => removeFromCart(productid)}
-                disabled={!isLoggedIn}
+                className="text-red-500 text-sm font-semibold hover:underline disabled:opacity-50 flex items-center gap-1"
+                onClick={handleRemove}
+                disabled={isRemoving || !isLoggedIn}
             >
-                Remove
+                {isRemoving ? (
+                    <AiOutlineLoading3Quarters className="animate-spin text-lg" />
+                ) : (
+                    "Remove"
+                )}
             </button>
         </div>
     );

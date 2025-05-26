@@ -1,154 +1,121 @@
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useAuth } from "./AuthContext";
+import { toast } from "react-toastify";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { isLoggedIn } = useAuth();
+
   const [cartItems, setCartItems] = useState(() => {
     const local = localStorage.getItem("cart");
     return local ? JSON.parse(local) : [];
   });
 
-
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartLoading, setLoading] = useState(false);
 
   const toggleCart = () => {
     setIsCartOpen((prev) => !prev);
   };
 
-
-  // Save cart to localStorage when changed
+  // Save cart to localStorage when cartItems changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const hasSynced = useRef(false);
-
-  const mergeCarts = (localCart, backendCart) => {
-    const merged = [...localCart];
-
-    backendCart.forEach((backendItem) => {
-      const existing = merged.find(item => item.productid === backendItem.productid);
-      if (existing) {
-        existing.quantity = Math.max(existing.quantity, backendItem.quantity);
-      } else {
-        merged.push(backendItem);
-      }
-    });
-
-    return merged;
-  };
-
-  // Sync logic on login or first load
+  // Fetch cart on login
   useEffect(() => {
-    const syncCartWithBackend = async () => {
-      if (isLoggedIn && !hasSynced.current) {
-        try {
-          const res = await axiosInstance.get(`/user/get-cart`);
-          const backendCart = res.data.cart || [];
-
-          const mergedCart = mergeCarts(cartItems, backendCart);
-          setCartItems(mergedCart); // triggers localStorage sync
-
-          // Remove only the items that already exist in backend from localStorage
-          const syncedIds = backendCart.map(item => item.productid);
-          const unsyncedLocalItems = cartItems.filter(
-            item => !syncedIds.includes(item.productid)
-          );
-          localStorage.setItem("cart", JSON.stringify(unsyncedLocalItems));
-
-          // Sync merged cart to backend
-          await axiosInstance.post("/user/update-cart", {
-            cart: mergedCart,
-          });
-
-          hasSynced.current = true;
-        } catch (error) {
-          console.error("Cart sync failed:", error);
-        }
-      }
-    };
-
-    syncCartWithBackend();
+    if (isLoggedIn) fetchCartItems();
   }, [isLoggedIn]);
 
-  const addToCart = async (productid, offeredPrice) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.productid === productid);
-      const updatedCart = existing
-        ? prev.map((item) =>
-          item.productid === productid
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-        : [...prev, { productid, quantity: 1, offeredPrice }];
-
-      // The updated item to sync to backend
-      const updatedItem = existing
-        ? {
-          productid,
-          quantity: existing.quantity + 1,
-          offeredPrice: existing.offeredPrice || offeredPrice,
-        }
-        : { productid, quantity: 1, offeredPrice };
-
-      // Save to localStorage
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-      // If logged in, sync only the updated item to backend
-      if (isLoggedIn) {
-        axiosInstance
-          .post("/user/update-cart", { cart: [updatedItem] })
-          .catch((err) => {
-            console.error("Failed to update single cart item:", err);
-          });
-      }
-
-      return updatedCart;
-    });
+  const fetchCartItems = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get("/user/get-cart");
+      const backendCart = res.data.cart || [];
+      setCartItems(backendCart);
+      localStorage.setItem("cart", JSON.stringify(backendCart));
+    } catch (error) {
+      console.error("Cart sync failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const addToCart = async (productid, offeredPrice) => {
+    const existing = cartItems.find((item) => item.productid === productid);
+    const updatedItem = existing
+      ? {
+        productid,
+        quantity: existing.quantity + 1,
+        offeredPrice: existing.offeredPrice || offeredPrice,
+      }
+      : { productid, quantity: 1, offeredPrice };
+
+    const updatedCart = existing
+      ? cartItems.map((item) =>
+        item.productid === productid ? updatedItem : item
+      )
+      : [...cartItems, updatedItem];
+
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    if (isLoggedIn) {
+      try {
+        await axiosInstance.post("/user/update-cart", {
+          cart: [updatedItem],
+        });
+        toast.success("Item added to cart successfully!");
+        await fetchCartItems();
+      } catch (err) {
+        console.error("Failed to update single cart item:", err);
+      }
+    }
+  };
 
   const removeFromCart = async (productid) => {
-    setCartItems((prev) => {
-      const updatedCart = prev.filter((item) => item.productid !== productid);
+    const updatedCart = cartItems.filter(
+      (item) => item.productid !== productid
+    );
 
-      // Update localStorage with filtered cart
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-      // If logged in, notify backend only about the removed item
-      if (isLoggedIn) {
-        axiosInstance
-          .post("/user/update-cart", {
-            cart: [{ productid, quantity: 0 }],
-          })
-          .catch((err) => {
-            console.error("Failed to sync cart after removal:", err);
-          });
+    if (isLoggedIn) {
+      try {
+        await axiosInstance.post("/user/update-cart", {
+          cart: [{ productid, quantity: 0 }],
+        });
+        toast.error("Item removed from cart successfully!");
+        await fetchCartItems();
+      } catch (err) {
+        console.error("Failed to sync cart after removal:", err);
       }
-
-      return updatedCart;
-    });
+    }
   };
-
 
   const updateQuantity = async (productid, quantity) => {
     if (quantity <= 0) return removeFromCart(productid);
 
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.productid === productid ? { ...item, quantity } : item
-      )
+    const updatedCart = cartItems.map((item) =>
+      item.productid === productid ? { ...item, quantity } : item
     );
 
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
     if (isLoggedIn) {
-      axiosInstance
-        .post("/user/update-cart", { cart: [{ productid, quantity }] })
-        .catch((err) => {
-          console.error("Failed to update quantity:", err);
+      try {
+        await axiosInstance.post("/user/update-cart", {
+          cart: [{ productid, quantity }],
         });
+        await fetchCartItems();
+      } catch (err) {
+        console.error("Failed to update quantity:", err);
+      }
     }
   };
 
@@ -158,6 +125,7 @@ export const CartProvider = ({ children }) => {
         isCartOpen,
         toggleCart,
         cartItems,
+        cartLoading,
         addToCart,
         removeFromCart,
         updateQuantity,
